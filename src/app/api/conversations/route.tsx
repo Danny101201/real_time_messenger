@@ -8,7 +8,7 @@ export async function POST(
   request: Request
 ) {
   try {
-    const currentUsers = await getCurrentUser()
+    const currentUser = await getCurrentUser()
     const body = await request.json()
     const {
       userId,
@@ -17,7 +17,7 @@ export async function POST(
       name
     } = body
 
-    if (!currentUsers?.id || !currentUsers.email) {
+    if (!currentUser?.id || !currentUser.email) {
       throw new NextResponse('Unauthorized', { status: 401 })
     }
     if (isGroup && (!members || members.length < 2 || !name)) {
@@ -38,9 +38,61 @@ export async function POST(
               }
             ]
           }
+        },
+        include: {
+          users: true
         }
       })
+      return NextResponse.json(newConversation, { status: 201 });
     }
+
+    const existingConversations = await prisma.conversation.findMany({
+      where: {
+        OR: [
+          {
+            users: {
+              some: {
+                id: currentUser.id
+              }
+            }
+          },
+          {
+            users: {
+              some: {
+                id: userId
+              }
+            }
+          }
+        ]
+      }
+    });
+
+    const singleConversation = existingConversations[0];
+
+    if (singleConversation) {
+      return NextResponse.json(singleConversation, { status: 200 });
+    }
+
+    const newConversation = await prisma.conversation.create({
+      data: {
+        users: {
+          connect: [
+            {
+              id: currentUser.id
+            },
+            {
+              id: userId
+            }
+          ]
+        }
+      },
+      include: {
+        users: true
+      }
+    });
+
+    return NextResponse.json(newConversation, { status: 201 });
+
   } catch (e) {
     if (e instanceof ZodError) {
       const { message } = e.errors[0]

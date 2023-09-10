@@ -18,7 +18,7 @@ export const UserBox = ({ item }: UserBoxProps) => {
       }).then(res => res.data)
       router.push(`/conversations/${result.id}`)
     } catch (e) {
-
+      console.log(e)
     } finally {
       setLoading(false)
     }

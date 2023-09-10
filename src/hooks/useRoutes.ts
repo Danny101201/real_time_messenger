@@ -21,9 +21,9 @@ export const useRoutes = () => {
   const routes = useMemo<Route[]>(() => ([
     {
       label: 'Chat',
-      href: '/conversation',
+      href: '/conversations',
       icon: HiChat,
-      active: pathname === '/conversation' || !!conversationId
+      active: pathname === '/conversations' || !!conversationId
     },
     {
       label: 'Users',
