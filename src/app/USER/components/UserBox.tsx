@@ -1,18 +1,23 @@
 'use client'
 import { Avatar } from '@/components/Avatar'
+import Loader from '@/components/Loader'
+import { useLoader } from '@/context/LoaderProvider'
 import { User } from '@prisma/client'
 import axios from 'axios'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
 interface UserBoxProps {
   item: User
 }
+
 export const UserBox = ({ item }: UserBoxProps) => {
+  const { setIsLoading } = useLoader()
+  const sesionInfo = useSession()
   const router = useRouter()
-  const [isLoading, setLoading] = useState<boolean>(false)
   const handleClick = useCallback(async () => {
     try {
-      setLoading(true)
+      setIsLoading(true)
       const result = await axios.post<{ id: string }>('api/conversations', {
         userId: item.id
       }).then(res => res.data)
@@ -20,7 +25,7 @@ export const UserBox = ({ item }: UserBoxProps) => {
     } catch (e) {
       console.log(e)
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
 
   }, [item, router])

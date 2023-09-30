@@ -18,6 +18,7 @@ export const Avatar = ({ user }: AvatarProps) => {
         md:h-11 
         md:w-11
       ">
+
         <Image
           alt='Avator'
           fill

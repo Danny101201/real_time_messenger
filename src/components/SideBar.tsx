@@ -3,6 +3,7 @@ import DeskTopSideBar from './SideBar/DeskTopSideBar'
 
 import { getCurrentUser } from '@/app/action/getCurrentUser'
 import MobileFooter from './SideBar/MobileFooter'
+import Loader from './Loader'
 
 
 async function SideBar({ children }: PropsWithChildren) {

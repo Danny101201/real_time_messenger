@@ -6,16 +6,20 @@ import GoogleProvider from "next-auth/providers/google"
 import DiscordProvider from "next-auth/providers/discord";
 
 import { PrismaAdapter } from "@auth/prisma-adapter";
-
+import prisma from "@/libs/db"
 
 import { env } from "@/app/env.mjs";
-import client, { prismaUtils } from '@/libs/db';
+import client from '@/libs/db';
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient()
+// declare module "next-auth/jwt" {
+//   interface JWT {
+//     test: String
+//   }
+// }
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
-  // pages: { error: '/auth/error', signIn: '/' },
+  pages: { signIn: '/' },
 
   // pages: {
   //   signIn: '/auth/signin',
@@ -71,17 +75,26 @@ export const authOptions: AuthOptions = {
   debug: env.NODE_ENV === 'development',
   session: {
     strategy: 'jwt',
-    // maxAge: 1 * 24 * 60 * 60
+    maxAge: 1 * 24 * 60 * 60
   },
   callbacks: {
-    async jwt({ token, user, account, profile, isNewUser }) {
+    async jwt({ token, user, account, profile, trigger, session }) {
+      if (trigger === 'signUp') {
+        // new User come here
+      }
+      if (trigger === 'update') {
 
+        token.update_session = session
+      }
       const userInfo = await client?.user.findFirst({ where: { email: token.email } })
       if (!userInfo) {
 
         return token
       }
       return { ...token, ...userInfo }
+    },
+    async session({ session, token }) {
+      return { ...session, ...token }
     }
   },
   secret: env.NEXTAUTH_SECRET

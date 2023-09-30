@@ -18,21 +18,10 @@ const CustomerErrFunc = async (model: any, query: any, args: any) => {
     throw e
   }
 }
-const prisma = (new PrismaClient()).$extends({
-  query: {
-    user: {
-      async findFirstOrThrow({ model, query, args }) {
-        return await CustomerErrFunc(model, query, args)
-      }
-    }
-  }
-});
+const prisma = global.prisma || new PrismaClient()
+if (env.NODE_ENV !== 'production') global.prisma = prisma
 
-
-
-export default prisma
-
-export const prismaUtils = prisma.$extends({
+const prismaUtils = prisma.$extends({
   model: {
     user: {
       async GetUser(email: string) {
@@ -57,6 +46,16 @@ export const prismaUtils = prisma.$extends({
     }
   }
 })
+
+const prismaUtils2 = prisma.$extends({
+  query: {
+    user: {
+      async findFirstOrThrow({ model, query, args }) {
+        return await CustomerErrFunc(model, query, args)
+      }
+    }
+  }
+});
 const main = async () => {
   try {
     const result1 = await prisma.user.findFirstOrThrow({
@@ -75,3 +74,4 @@ const main = async () => {
 }
 
 
+export default prisma

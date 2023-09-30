@@ -43,34 +43,32 @@ export async function POST(
           users: true
         }
       })
-      return NextResponse.json(newConversation, { status: 201 });
+      return NextResponse.json({ id: newConversation.id }, { status: 201 });
     }
 
     const existingConversations = await prisma.conversation.findMany({
       where: {
-        OR: [
+        AND: [
           {
             users: {
               some: {
-                id: currentUser.id
+                id: currentUser.id,
               }
             }
           },
           {
             users: {
               some: {
-                id: userId
+                id: userId,
               }
             }
-          }
+          },
         ]
       }
     });
-
     const singleConversation = existingConversations[0];
-
     if (singleConversation) {
-      return NextResponse.json(singleConversation, { status: 200 });
+      return NextResponse.json({ id: singleConversation.id }, { status: 200 });
     }
 
     const newConversation = await prisma.conversation.create({
@@ -91,7 +89,7 @@ export async function POST(
       }
     });
 
-    return NextResponse.json(newConversation, { status: 201 });
+    return NextResponse.json({ id: newConversation.id }, { status: 201 });
 
   } catch (e) {
     if (e instanceof ZodError) {

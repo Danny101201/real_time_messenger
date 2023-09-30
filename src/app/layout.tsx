@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google'
 import Image from 'next/image'
 import { Providers } from './provider'
 import { redirect } from 'next/navigation'
+import LoadingStatus from '@/components/LoadingStatus'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
+          <LoadingStatus/>
           {children}
         </Providers>
       </body>

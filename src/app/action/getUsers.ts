@@ -1,5 +1,5 @@
 'use server'
-import client, { prismaUtils } from '@/libs/db';
+import client from '@/libs/db';
 import { getSession } from './getSession';
 
 export const getUsers = async () => {

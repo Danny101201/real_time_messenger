@@ -24,7 +24,6 @@ const main = async () => {
       users: true
     }
   })
-  console.log(exisitionConverastions)
 }
 main()
   .catch(async (e) => {

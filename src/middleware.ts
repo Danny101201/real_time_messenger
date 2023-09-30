@@ -21,33 +21,33 @@ export default withAuth(
   // `withAuth` augments your `Request` with the user's token.
   async function middleware(request) {
     try {
-      const ip = request.headers.get('X-Forwarded-For') as string
+      // const ip = request.headers.get('X-Forwarded-For') as string
       const pathName = request.nextUrl.pathname
       if (pathName.startsWith('/api')) {
-        try {
-          const { success, reset } = await ratelimit.limit(ip)
-          if (!success) {
-            const now = Date.now()
-            const retryAfter = Math.floor(now - reset) / 1000
-            return new NextResponse('too many request', {
-              status: 429,
-              headers: {
-                ["retry-after"]: retryAfter.toString()
-              }
-            })
-          }
-          return NextResponse.next()
-        } catch (e) {
-          return new NextResponse('Internal Server Error', { status: 500 })
-        }
+        return NextResponse.next()
+        // try {
+        //   const { success, reset } = await ratelimit.limit(ip)
+        //   if (!success) {
+        //     const now = Date.now()
+        //     const retryAfter = Math.floor(now - reset) / 1000
+        //     return new NextResponse('too many request', {
+        //       status: 429,
+        //       headers: {
+        //         ["retry-after"]: retryAfter.toString()
+        //       }
+        //     })
+        //   }
+        //   return NextResponse.next()
+        // } catch (e) {
+        //   return new NextResponse('Internal Server Error', { status: 500 })
+        // }
       }
 
       // auth 
       const token = await getToken({ req: request })
       const isAuth = !!token
-      const sensitiveRoutes = ['/USER']
+      const sensitiveRoutes = ['/USER', '/conversations']
       if (isAuth && !sensitiveRoutes.some(route => pathName.startsWith(route))) return NextResponse.redirect(new URL('/USER', request.url))
-
       if (!isAuth && sensitiveRoutes.some(route => pathName.startsWith(route))) {
         return NextResponse.redirect(new URL('/', request.url))
       }
@@ -72,5 +72,5 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ['/', '/test', '/USER', '/api/:path*'],
+  matcher: ['/:path*', '/api/:path*'],
 }

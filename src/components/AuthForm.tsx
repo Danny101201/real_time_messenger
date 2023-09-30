@@ -15,14 +15,28 @@ import { SearchInput } from "./SearchInput";
 import { RegisterSchema } from "../app/api/register/route";
 import toast from 'react-hot-toast';
 import { set } from "lodash";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginFormSchema, registerFormSchema, RegisterFormSchema, LoginFormSchema } from "@/validate/Auth";
+import { useLoader } from "@/context/LoaderProvider";
 
 type Variant = 'LOGIN' | 'REGISTER'
 
 
 export const AuthForm = () => {
-  const session = useSession()
+  const query = useSearchParams()
+  const authError = query.get('error')
+  const session = useSession({
+    required: true,
+    onUnauthenticated() {
+      if (
+        authError &&
+        authError === 'OAuthAccountNotLinked'
+      ) {
+        toast.error('此 email 已經註冊過，無法登入第三方，請使用原先 email 登入方式登入')
+        router.replace('/')
+      }
+    },
+  })
   const router = useRouter()
   useEffect(() => {
     if (session.status === 'authenticated') {
@@ -30,7 +44,7 @@ export const AuthForm = () => {
     }
   }, [session.status])
   const [variants, setVariants] = useState<Variant>('LOGIN')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { isLoading, setIsLoading } = useLoader()
   const toggleVariant = useCallback(() => {
     if (variants == 'LOGIN') setVariants('REGISTER')
     if (variants == 'REGISTER') setVariants('LOGIN')
